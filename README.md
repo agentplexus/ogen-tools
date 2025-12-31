@@ -6,9 +6,9 @@
 [![Docs][docs-godoc-svg]][docs-godoc-url]
 [![License][license-svg]][license-url]
 
-A collection of tools to make [ogen](https://github.com/ogen-go/ogen) more usable.
+A collection of tools to enable [ogen](https://github.com/ogen-go/ogen) to accommodate some specific spec features.
 
-ogen is an excellent OpenAPI v3 code generator for Go, but it has some rough edges. This repo provides post-processing tools to work around known issues until they're fixed upstream.
+This repo provides post-processing tools to work around known issues until they're fixed upstream. These tools are designed to be able to be able to run on all code without side effects.
 
 ## Tools
 
