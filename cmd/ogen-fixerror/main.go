@@ -47,17 +47,14 @@ func run(args []string) error {
 		return fmt.Errorf("read file: %w", err)
 	}
 
-	fixed, count, err := FixUnexpectedStatusCodeBody(content)
-	if err != nil {
-		return fmt.Errorf("fix error body: %w", err)
-	}
+	fixed, count := FixUnexpectedStatusCodeBody(content)
 
 	if count == 0 {
 		fmt.Printf("No UnexpectedStatusCode returns needed fixing in %s\n", filename)
 		return nil
 	}
 
-	if err := os.WriteFile(filename, fixed, 0644); err != nil {
+	if err := os.WriteFile(filename, fixed, 0600); err != nil {
 		return fmt.Errorf("write file: %w", err)
 	}
 
@@ -67,7 +64,7 @@ func run(args []string) error {
 
 // FixUnexpectedStatusCodeBody finds returns of validate.UnexpectedStatusCodeWithResponse
 // and adds code to buffer the response body before returning.
-func FixUnexpectedStatusCodeBody(content []byte) ([]byte, int, error) {
+func FixUnexpectedStatusCodeBody(content []byte) ([]byte, int) {
 	// Check if we need to add imports
 	needsImports := !bytes.Contains(content, []byte(`"bytes"`)) ||
 		!bytes.Contains(content, []byte(`"io"`))
@@ -100,7 +97,7 @@ func FixUnexpectedStatusCodeBody(content []byte) ([]byte, int, error) {
 		fixed = addImports(fixed)
 	}
 
-	return fixed, count, nil
+	return fixed, count
 }
 
 // addImports ensures "bytes" and "io" are in the import block

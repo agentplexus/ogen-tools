@@ -26,10 +26,7 @@ func decodeTestResponse(resp *http.Response) (res TestRes, _ error) {
 	resp.Body = io.NopCloser(bytes.NewReader(body))
 	return res, validate.UnexpectedStatusCodeWithResponse(resp)`
 
-	fixed, count, err := FixUnexpectedStatusCodeBody([]byte(input))
-	if err != nil {
-		t.Fatalf("FixUnexpectedStatusCodeBody() error = %v", err)
-	}
+	fixed, count := FixUnexpectedStatusCodeBody([]byte(input))
 
 	if count != 1 {
 		t.Errorf("count = %d, want 1", count)
@@ -64,10 +61,7 @@ func decode2(resp *http.Response) (res Res2, _ error) {
 }
 `
 
-	fixed, count, err := FixUnexpectedStatusCodeBody([]byte(input))
-	if err != nil {
-		t.Fatalf("FixUnexpectedStatusCodeBody() error = %v", err)
-	}
+	fixed, count := FixUnexpectedStatusCodeBody([]byte(input))
 
 	if count != 2 {
 		t.Errorf("count = %d, want 2", count)
@@ -94,10 +88,7 @@ func decodeTest(resp *http.Response) (res TestRes, _ error) {
 }
 `
 
-	fixed, count, err := FixUnexpectedStatusCodeBody([]byte(input))
-	if err != nil {
-		t.Fatalf("FixUnexpectedStatusCodeBody() error = %v", err)
-	}
+	fixed, count := FixUnexpectedStatusCodeBody([]byte(input))
 
 	if count != 1 {
 		t.Errorf("count = %d, want 1", count)

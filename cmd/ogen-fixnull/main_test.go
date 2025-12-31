@@ -148,10 +148,7 @@ func (o *OptBar) Decode(d *jx.Decoder) error {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fixed, count, err := FixOptDecodeNullHandling([]byte(tt.input))
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
+			fixed, count := FixOptDecodeNullHandling([]byte(tt.input))
 
 			if count != tt.wantCount {
 				t.Errorf("count = %d, want %d", count, tt.wantCount)
@@ -199,10 +196,7 @@ func SomeOtherFunc() {
 }
 `
 
-	fixed, count, err := FixOptDecodeNullHandling([]byte(input))
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	fixed, count := FixOptDecodeNullHandling([]byte(input))
 
 	if count != 1 {
 		t.Errorf("count = %d, want 1", count)

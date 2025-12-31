@@ -44,17 +44,14 @@ func run(args []string) error {
 		return fmt.Errorf("read file: %w", err)
 	}
 
-	fixed, count, err := FixOptDecodeNullHandling(content)
-	if err != nil {
-		return fmt.Errorf("fix null handling: %w", err)
-	}
+	fixed, count := FixOptDecodeNullHandling(content)
 
 	if count == 0 {
 		fmt.Printf("No Opt* Decode methods needed fixing in %s\n", filename)
 		return nil
 	}
 
-	if err := os.WriteFile(filename, fixed, 0644); err != nil {
+	if err := os.WriteFile(filename, fixed, 0600); err != nil {
 		return fmt.Errorf("write file: %w", err)
 	}
 
@@ -88,7 +85,7 @@ func run(args []string) error {
 //		}
 //		o.Set = true
 //		if err := o.Value.Decode(d); err != nil {
-func FixOptDecodeNullHandling(content []byte) ([]byte, int, error) {
+func FixOptDecodeNullHandling(content []byte) ([]byte, int) {
 	// Pattern matches Opt* Decode methods that are missing null handling.
 	// It captures:
 	// 1. The type name (e.g., OptManualVerificationResponseModel)
@@ -142,5 +139,5 @@ func FixOptDecodeNullHandling(content []byte) ([]byte, int, error) {
 		return result.Bytes()
 	})
 
-	return fixed, count, nil
+	return fixed, count
 }
