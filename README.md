@@ -1,0 +1,123 @@
+# ogen tools
+
+[![Build Status][build-status-svg]][build-status-url]
+[![Lint Status][lint-status-svg]][lint-status-url]
+[![Go Report Card][goreport-svg]][goreport-url]
+[![Docs][docs-godoc-svg]][docs-godoc-url]
+[![License][license-svg]][license-url]
+
+A collection of tools to make [ogen](https://github.com/ogen-go/ogen) more usable.
+
+ogen is an excellent OpenAPI v3 code generator for Go, but it has some rough edges. This repo provides post-processing tools to work around known issues until they're fixed upstream.
+
+## Tools
+
+| Tool | Description | Issue |
+|------|-------------|-------|
+| [ogen-fixnull](cmd/ogen-fixnull/) | Fix null handling in `Opt*` types | [#1358](https://github.com/ogen-go/ogen/issues/1358) |
+| [ogen-fixerror](cmd/ogen-fixerror/) | Preserve error response bodies | - |
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| [ogenerror](ogenerror/) | Extract status code and body from ogen errors |
+
+## Quick Start
+
+### ogen-fixnull
+
+Fixes JSON decoding errors when APIs return `null` for nullable `$ref` fields.
+
+**Install:**
+```bash
+go install github.com/agentplexus/ogen-tools/cmd/ogen-fixnull@latest
+```
+
+**Use:**
+```bash
+ogen --package api --target internal/api --clean openapi.json
+ogen-fixnull internal/api/oas_json_gen.go
+```
+
+**Or without installing:**
+```bash
+go run github.com/agentplexus/ogen-tools/cmd/ogen-fixnull@latest internal/api/oas_json_gen.go
+```
+
+See [cmd/ogen-fixnull/README.md](cmd/ogen-fixnull/README.md) for detailed documentation.
+
+### ogen-fixerror
+
+Preserves error response bodies so they can be read after the response is closed.
+
+**Problem:** ogen's `UnexpectedStatusCodeError` contains the `*http.Response`, but the body gets closed by `defer resp.Body.Close()` before callers can read it.
+
+**Use:**
+```bash
+ogen --package api --target internal/api --clean openapi.json
+ogen-fixerror internal/api/oas_response_decoders_gen.go
+```
+
+**Or without installing:**
+```bash
+go run github.com/agentplexus/ogen-tools/cmd/ogen-fixerror@latest internal/api/oas_response_decoders_gen.go
+```
+
+### ogenerror
+
+Extract error details from ogen client errors:
+
+```go
+import "github.com/agentplexus/ogen-tools/ogenerror"
+
+resp, err := client.SomeMethod(ctx, req)
+if err != nil {
+    if status := ogenerror.Parse(err); status != nil {
+        fmt.Printf("Status: %d, Body: %s\n", status.StatusCode, status.Body)
+    }
+}
+```
+
+See [ogenerror/README.md](ogenerror/README.md) for detailed documentation.
+
+## Typical generate.sh
+
+```bash
+#!/bin/bash
+set -e
+
+# Prerequisites:
+#   go install github.com/ogen-go/ogen/cmd/ogen@latest
+
+# Generate API code
+ogen --package api --target internal/api --clean openapi.json
+
+# Post-process: Fix ogen bugs
+go run github.com/agentplexus/ogen-tools/cmd/ogen-fixnull@latest internal/api/oas_json_gen.go
+go run github.com/agentplexus/ogen-tools/cmd/ogen-fixerror@latest internal/api/oas_response_decoders_gen.go
+
+# Verify
+go build ./...
+```
+
+## Contributing
+
+Found another ogen issue that needs a workaround? PRs welcome.
+
+## License
+
+MIT
+
+ [build-status-svg]: https://github.com/agentplexus/ogen-tools/actions/workflows/ci.yaml/badge.svg?branch=main
+ [build-status-url]: https://github.com/agentplexus/ogen-tools/actions/workflows/ci.yaml
+ [lint-status-svg]: https://github.com/agentplexus/ogen-tools/actions/workflows/lint.yaml/badge.svg?branch=main
+ [lint-status-url]: https://github.com/agentplexus/ogen-tools/actions/workflows/lint.yaml
+ [goreport-svg]: https://goreportcard.com/badge/github.com/agentplexus/ogen-tools
+ [goreport-url]: https://goreportcard.com/report/github.com/agentplexus/ogen-tools
+ [docs-godoc-svg]: https://pkg.go.dev/badge/github.com/agentplexus/ogen-tools
+ [docs-godoc-url]: https://pkg.go.dev/github.com/agentplexus/ogen-tools
+ [license-svg]: https://img.shields.io/badge/license-MIT-blue.svg
+ [license-url]: https://github.com/agentplexus/ogen-tools/blob/master/LICENSE
+ [used-by-svg]: https://sourcegraph.com/github.com/agentplexus/ogen-tools/-/badge.svg
+ [used-by-url]: https://sourcegraph.com/github.com/agentplexus/ogen-tools?badge
